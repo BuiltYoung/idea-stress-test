@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea Stress-Test · Built Young</title>
+<meta name="description" content="Answer six questions about your startup idea and get an honest report with a score out of 100.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --page: #FFF9F0;
+  --paper: #FFFFFF;
+  --ink: #241E17;
+  --muted: #6E6457;
+  --line: #EADFCF;
+  --orange: #E8730C;
+  --orange-soft: #FDEBD8;
+  --teal: #0D9488;
+  --teal-deep: #0B766C;
+  --rust: #9A3412;
+  --sans: "Plus Jakarta Sans", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--sans);
+}
+a { color: var(--teal-deep); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, .pill input:focus-visible + span {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+.brand { font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+.brand span { color: var(--orange); }
+.lang {
+  font: 600 14px var(--sans); color: var(--ink); background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+}
+.lang:hover { border-color: var(--ink); }
+
+/* intro */
+.intro { padding: 36px 0 28px; }
+.intro h1 {
+  font-size: clamp(40px, 7.5vw, 72px); line-height: 1.02; letter-spacing: -0.035em;
+  font-weight: 800; margin: 0 0 20px; max-width: 12ch;
+}
+.intro p { font-size: 19px; color: var(--muted); margin: 0 0 14px; max-width: 58ch; }
+.intro .note { font-size: 15px; }
+.linkbtn {
+  font: 600 15px var(--sans); color: var(--teal-deep); background: none; border: 0; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+
+/* form */
+form {
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 8px 28px 28px; margin-bottom: 40px;
+}
+.q { display: grid; grid-template-columns: 36px 1fr; gap: 0 14px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.q:last-of-type { border-bottom: 0; }
+.q .n {
+  font: 600 15px var(--mono); color: var(--orange); padding-top: 2px;
+}
+.q label.t, .q legend.t { font-weight: 700; font-size: 17px; line-height: 1.4; display: block; padding: 0; margin: 0 0 4px; }
+.q .hint { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+.q .opt { color: var(--muted); font-weight: 500; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+textarea, input[type=text] {
+  width: 100%; font: 400 16px/1.5 var(--sans); color: var(--ink);
+  background: var(--page); border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px;
+}
+textarea { min-height: 92px; resize: vertical; }
+textarea::placeholder, input::placeholder { color: #A89C8C; }
+textarea:focus, input[type=text]:focus { border-color: var(--orange); background: #fff; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.pill { position: relative; }
+.pill input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pill span {
+  display: inline-block; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px;
+  font-size: 15px; font-weight: 500; background: var(--page); cursor: pointer; user-select: none;
+}
+.pill input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pill input:hover + span { border-color: var(--ink); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.submit-row { padding-top: 22px; }
+.privacy { color: var(--muted); font-size: 13px; margin: 0 0 16px; max-width: 64ch; }
+.primary {
+  font: 700 17px var(--sans); color: #fff; background: var(--orange); border: 0;
+  border-radius: 12px; padding: 15px 26px; cursor: pointer; width: 100%;
+}
+.primary:hover { background: #CF6408; }
+.primary[disabled] { opacity: .6; cursor: progress; }
+.field-error { color: var(--rust); font-size: 14px; font-weight: 600; margin: 8px 0 0; }
+
+/* states */
+.state {
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 28px; margin-bottom: 40px;
+}
+.state h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; }
+.state p { margin: 0; color: var(--muted); }
+.spinner {
+  width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--orange-soft);
+  border-top-color: var(--orange); animation: spin 0.9s linear infinite; margin-bottom: 16px;
+}
+.elapsed { font: 500 14px var(--mono); color: var(--muted); margin-top: 10px !important; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.state.err { border-color: #F0C5A8; }
+.state.err h2 { color: var(--rust); }
+
+/* report */
+.report { margin-bottom: 56px; }
+.banner {
+  background: var(--orange-soft); border-radius: 12px; padding: 12px 16px; font-size: 14px;
+  font-weight: 500; margin-bottom: 24px;
+}
+.report h2.title {
+  font-size: clamp(30px, 5.2vw, 44px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; margin: 0 0 24px;
+}
+.understood { border-left: 3px solid var(--line); padding: 2px 0 2px 18px; margin-bottom: 36px; }
+.understood h3 { font-size: 15px; margin: 0 0 6px; color: var(--muted); font-weight: 600; }
+.understood ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+.understood .gaps { margin-top: 10px; color: var(--rust); font-size: 14px; font-weight: 500; }
+.sec { padding: 28px 0; border-top: 1.5px solid var(--line); }
+.sec h3 { font-size: 23px; letter-spacing: -0.015em; margin: 0 0 12px; font-weight: 800; }
+.sec h3 .e { margin-right: 6px; }
+.sec p { margin: 0 0 12px; max-width: 68ch; }
+.sec p:last-child { margin-bottom: 0; }
+.lede { font-size: 19px; font-weight: 600; line-height: 1.5; }
+.lbl { font-weight: 700; }
+.comp { list-style: none; padding: 0; margin: 0 0 14px; }
+.comp li { padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.comp li:last-child { border-bottom: 0; }
+.comp .src { font-size: 13px; margin-left: 6px; white-space: nowrap; }
+.quote {
+  background: var(--page); border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  font-weight: 500; margin: 0 0 12px; max-width: 68ch;
+}
+.sec ul.plain { margin: 0 0 12px; padding-left: 20px; }
+
+/* score: the one loud element */
+.scorehead { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 18px; margin: 4px 0 18px; }
+.big { font: 600 clamp(84px, 16vw, 128px)/0.9 var(--mono); letter-spacing: -0.05em; color: var(--ink); }
+.big small { font-size: 0.26em; letter-spacing: 0; color: var(--muted); margin-left: 4px; }
+.verdict {
+  font-weight: 800; font-size: 15px; letter-spacing: 0.02em; color: #fff; border-radius: 999px; padding: 7px 14px;
+}
+.v-build { background: var(--teal); }
+.v-narrow { background: var(--orange); }
+.v-notyet { background: var(--rust); }
+.bar { display: flex; gap: 3px; height: 22px; margin: 0 0 6px; }
+.seg { background: var(--orange-soft); border-radius: 4px; overflow: hidden; position: relative; }
+.seg i { display: block; height: 100%; background: var(--orange); }
+.barlabels { display: flex; gap: 3px; margin-bottom: 20px; }
+.barlabels span { font-size: 12px; color: var(--muted); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 15px; }
+th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 600; padding: 8px 8px 8px 0; border-bottom: 1.5px solid var(--line); }
+td { padding: 10px 8px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.pts { font: 600 15px var(--mono); white-space: nowrap; }
+td.name { font-weight: 600; white-space: nowrap; }
+th:nth-child(2), td.pts { width: 72px; }
+th:first-child { width: 150px; }
+.advice { background: var(--page); border-radius: 12px; padding: 14px 16px; margin-top: 6px; font-weight: 500; }
+
+.cta {
+  background: var(--teal); color: #fff; border-radius: 18px; padding: 26px 28px; margin: 28px 0 8px;
+}
+.cta h3 { margin: 0 0 10px; font-size: 22px; letter-spacing: -0.01em; }
+.cta p { margin: 0 0 8px; max-width: 64ch; }
+.cta a { color: #fff; font-weight: 700; word-break: break-word; }
+.sources { padding-top: 24px; }
+.sources h3 { font-size: 15px; color: var(--muted); margin: 0 0 6px; }
+.sources ol { margin: 0; padding-left: 20px; font-size: 14px; }
+.sources li { margin-bottom: 4px; word-break: break-word; }
+.again {
+  margin-top: 28px; font: 700 16px var(--sans); color: var(--ink); background: transparent;
+  border: 1.5px solid var(--ink); border-radius: 12px; padding: 12px 20px; cursor: pointer;
+}
+.again:hover { background: var(--ink); color: #fff; }
+
+footer { color: var(--muted); font-size: 13px; padding: 24px 0 48px; border-top: 1px solid var(--line); }
+footer a { color: var(--muted); }
+
+@media (max-width: 600px) {
+  .wrap { padding: 0 16px; }
+  form { padding: 4px 18px 20px; }
+  .q { grid-template-columns: 1fr; }
+  .q .n { padding: 0 0 4px; }
+  .state, .cta { padding: 22px 20px; }
+  .barlabels { display: none; }
+  .bar { margin-bottom: 18px; }
+  td.name { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; border-top-color: var(--orange); }
+}
+@media print {
+  .top .lang, form, .again, .intro { display: none !important; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="https://builtyoung.org/">Built Young<span>.</span></a>
+    <button class="lang" id="langBtn" type="button" aria-label="Switch language">中文</button>
+  </header>
+
+  <main>
+    <section class="intro" id="intro">
+      <h1 data-t="hero_title"></h1>
+      <p data-t="hero_sub"></p>
+      <p class="note"><span data-t="hero_note"></span> <button type="button" class="linkbtn" id="sampleBtn" data-t="sample_link"></button></p>
+    </section>
+
+    <form id="form" novalidate>
+      <div class="q">
+        <span class="n" aria-hidden="true">1</span>
+        <div>
+          <label class="t" for="idea" data-t="q1"></label>
+          <p class="hint" data-t="q1_hint"></p>
+          <textarea id="idea" name="idea" maxlength="1200" data-ph="q1_ph" aria-describedby="ideaErr" required></textarea>
+          <p class="field-error" id="ideaErr" hidden data-t="err_idea"></p>
+        </div>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">2</span>
+        <div>
+          <label class="t" for="customer" data-t="q2"></label>
+          <p class="hint" data-t="q2_hint"></p>
+          <input type="text" id="customer" name="customer" maxlength="600" data-ph="q2_ph">
+        </div>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">3</span>
+        <div>
+          <label class="t" for="problem" data-t="q3"></label>
+          <p class="hint" data-t="q3_hint"></p>
+          <textarea id="problem" name="problem" maxlength="1200" data-ph="q3_ph"></textarea>
+        </div>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">4</span>
+        <div>
+          <label class="t" for="real_person" data-t="q4"></label>
+          <p class="hint" data-t="q4_hint"></p>
+          <input type="text" id="real_person" name="real_person" maxlength="600" data-ph="q4_ph">
+        </div>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">5</span>
+        <fieldset>
+          <legend class="t" data-t="q5"></legend>
+          <div class="pills" id="stagePills"></div>
+        </fieldset>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">6</span>
+        <fieldset>
+          <legend class="t" data-t="q6"></legend>
+          <div class="pills" id="moneyPills"></div>
+        </fieldset>
+      </div>
+      <div class="q">
+        <span class="n" aria-hidden="true">+</span>
+        <div>
+          <label class="t" for="details"><span data-t="q7"></span> <span class="opt" data-t="optional"></span></label>
+          <p class="hint" data-t="q7_hint"></p>
+          <textarea id="details" name="details" maxlength="4000"></textarea>
+        </div>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="submit-row">
+        <p class="privacy" data-t="privacy"></p>
+        <button class="primary" id="submitBtn" type="submit" data-t="submit"></button>
+      </div>
+    </form>
+
+    <section class="state" id="loading" hidden aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <h2 data-t="loading_title"></h2>
+      <p data-t="loading_body"></p>
+      <p class="elapsed" id="elapsed"></p>
+    </section>
+
+    <section class="state err" id="error" hidden role="alert">
+      <h2 data-t="error_title"></h2>
+      <p id="errorMsg"></p>
+    </section>
+
+    <article class="report" id="report" hidden tabindex="-1"></article>
+  </main>
+
+  <footer>
+    <span data-t="footer"></span>
+    <a href="https://github.com/BuiltYoung/idea-stress-test">idea-stress-test</a>
+  </footer>
+</div>
+
+<script>
+/* ===== Set these two values when the API is deployed (see README) ===== */
+const CONFIG = {
+  API_URL: "",          // e.g. "https://YOUR-PROJECT.supabase.co/functions/v1/validate-idea"
+  API_KEY: "",          // Supabase anon (public) key. Leave blank if deployed with --no-verify-jwt
+  SHOW_SAMPLE_LINK: true,
+  TIMEOUT_MS: 150000
+};
+
+const T = {
+  en: {
+    toggle: "中文",
+    hero_title: "Is your idea worth building?",
+    hero_sub: "Answer six questions. You'll get an honest report: who it's for, who you're up against, a score out of 100, and one thing to do this week.",
+    hero_note: "Free from Built Young. The report takes a minute or two.",
+    sample_link: "See a sample report",
+    q1: "Describe your idea in a sentence or two.",
+    q1_hint: "What does it do, and for whom?",
+    q1_ph: "An app that…",
+    q2: "Who is your ideal customer?",
+    q2_hint: "The first group you'd hand it to. Not \"students\", but \"grade 11 students in Markham who…\"",
+    q2_ph: "The first group you'd give it to",
+    q3: "What problem does it solve, and what do people do about it today?",
+    q3_hint: "Today's workaround is usually your real competitor: a group chat, a spreadsheet, asking a friend.",
+    q3_ph: "The problem is… Right now they…",
+    q4: "Name one real person with this problem.",
+    q4_hint: "Someone you could message today. When did they last run into it? A first name is enough.",
+    q4_ph: "e.g. Mia, my teammate. Last week she…",
+    q5: "Where are you now?",
+    q6: "How will it make money?",
+    q7: "Anything else?",
+    optional: "(optional)",
+    q7_hint: "Paste a product description, your features, or what you've learned so far.",
+    stage: { idea: "Just an idea", prototype: "Prototype", live: "Live with users", paying: "People are paying" },
+    money: { subscription: "Subscription", per_use: "Pay per use", one_time: "One-time purchase", commission: "Take a cut of sales", ads: "Ads", free: "It's meant to be free", unsure: "Not sure yet" },
+    privacy: "Your answers go to Built Young's server and to Claude, Anthropic's AI, to write your report. Don't include phone numbers, addresses or other private details.",
+    submit: "Test my idea",
+    submitting: "Testing your idea…",
+    err_idea: "Describe your idea first. A sentence or two is enough.",
+    loading_title: "Testing your idea",
+    loading_body: "We're searching the web for competitors, then scoring your answers. This can take a minute or two.",
+    elapsed: (s) => `${s}s`,
+    error_title: "The report didn't finish",
+    error_generic: "Something went wrong on our side. Your answers are still in the form, so try again in a minute.",
+    error_rate: "You've tested several ideas this hour. Try again later.",
+    error_timeout: "The report took too long. Try again; it's usually faster the second time.",
+    error_refused: "We couldn't write a report for this idea. Try describing it differently.",
+    error_idea: "Describe your idea in at least a sentence, then submit again.",
+    footer: "AI-generated report. Check the facts before you rely on them. Built Young ·",
+    // report
+    banner_sample: "This is a sample report for Echo (回响), a hobby-partner app in Toronto.",
+    banner_preview: "The API isn't connected yet, so this is a sample report, not yours. See the README to connect it.",
+    title_suffix: ": Idea Validation Results",
+    understood: "What we took from your answers",
+    gaps: "Not answered, so scored as unproven:",
+    s1: "Idea Fit & Alignment", s2: "Competitor Snapshot", s3: "Opportunity",
+    s4: "Startup Score", s5: "Customer Targeting", s6: "One Thing to Do",
+    gap: "Biggest gap:", safety: "Safety:", source: "source",
+    why_here: "Why start here:", money_signal: "Money signal:",
+    out_of: "/ 100",
+    lines: { problem_who: "Problem & who", real_person: "Real person", substitute: "Substitute", demand: "Demand signal", money: "Money", reach: "Reach", build: "Build" },
+    th_line: "Line", th_score: "Score", th_why: "Why",
+    holding: "What's holding it back:", raise: "What would raise it most:",
+    verdicts: { "BUILD IT": "BUILD IT", "NARROW IT": "NARROW IT", "NOT YET": "NOT YET" },
+    start_with: "Start with:", gather: "Where they gather:", opener: "Conversation opener:", listen: "Listen for:",
+    pass: "Pass if:", miss: "If it misses:",
+    sources: "Sources",
+    again: "Test another idea",
+    cta_title: "Want to see what winning teen ideas look like?",
+    cta_1: "Browse our idea database, the challenge-startup-coach skill. It holds 152 real finalist projects from Diamond Challenge, Conrad Challenge and Blue Ocean (62 won awards), plus the judging rubrics of all four competitions, including DECA → ",
+    cta_2a: "Then contact Built Young → ",
+    cta_2b: " and let's build this together!"
+  },
+  zh: {
+    toggle: "EN",
+    hero_title: "你的 idea 值得做吗？",
+    hero_sub: "回答六个问题，拿到一份不说客套话的报告：给谁用、对手是谁、100 分制评分，以及这周就能做的一件事。",
+    hero_note: "Built Young 免费提供，报告大约需要一两分钟。",
+    sample_link: "看一份示例报告",
+    q1: "用一两句话描述你的 idea。",
+    q1_hint: "它做什么，给谁用？",
+    q1_ph: "一个帮……的 App",
+    q2: "你的理想用户是谁？",
+    q2_hint: "你最先会拿给哪群人用。不要写「学生」，要写「万锦十一年级、正在……的学生」。",
+    q2_ph: "你最先会给哪群人用",
+    q3: "它解决什么问题？大家现在怎么解决？",
+    q3_hint: "现在的土办法通常才是你真正的对手：一个群聊、一张表格、问朋友。",
+    q3_ph: "问题是……现在他们……",
+    q4: "说出一个真的有这个问题的人。",
+    q4_hint: "今天就能发消息的人。他上一次遇到这个问题是什么时候？写名字就行。",
+    q4_ph: "比如：Mia，我的队友。上周她……",
+    q5: "你现在做到哪一步了？",
+    q6: "打算怎么赚钱？",
+    q7: "还有要补充的吗？",
+    optional: "（选填）",
+    q7_hint: "可以贴产品介绍、功能，或者你目前学到的东西。",
+    stage: { idea: "只是想法", prototype: "有原型", live: "已上线有用户", paying: "已经有人付费" },
+    money: { subscription: "订阅", per_use: "按次付费", one_time: "一次性购买", commission: "交易抽成", ads: "广告", free: "打算免费", unsure: "还没想好" },
+    privacy: "你的回答会发送到 Built Young 的服务器和 Anthropic 的 AI Claude 来生成报告。请不要填写电话、地址等私人信息。",
+    submit: "测试我的 idea",
+    submitting: "正在测试……",
+    err_idea: "先描述一下你的 idea，一两句话就够。",
+    loading_title: "正在测试你的 idea",
+    loading_body: "我们先在网上搜索竞品，再给你的回答打分，大约需要一两分钟。",
+    elapsed: (s) => `${s} 秒`,
+    error_title: "报告没有生成",
+    error_generic: "我们这边出了点问题。你的回答还在表单里，过一分钟再试一次。",
+    error_rate: "这个小时你已经测试了好几个 idea，晚点再试。",
+    error_timeout: "报告生成时间太长了，再试一次，第二次通常更快。",
+    error_refused: "这个 idea 没法生成报告，换一种描述方式试试。",
+    error_idea: "至少用一句话描述你的 idea，然后再提交。",
+    footer: "报告由 AI 生成，使用前请自己核实事实。Built Young ·",
+    banner_sample: "这是 Echo（回响）的示例报告，一个多伦多的找搭子 App。",
+    banner_preview: "API 还没接上，所以这里显示的是示例报告，不是你的。接入方法见 README。",
+    title_suffix: "：创意验证结果",
+    understood: "我们从你的回答里读到的",
+    gaps: "没有回答，按未证实打分：",
+    s1: "想法契合度", s2: "竞品速览", s3: "机会",
+    s4: "创业评分", s5: "目标用户", s6: "只做一件事",
+    gap: "最大的缺口：", safety: "安全：", source: "来源",
+    why_here: "为什么从这里开始：", money_signal: "付费信号：",
+    out_of: "/ 100",
+    lines: { problem_who: "问题与用户", real_person: "真实用户", substitute: "替代方案", demand: "需求信号", money: "赚钱", reach: "触达", build: "产品" },
+    th_line: "项目", th_score: "得分", th_why: "原因",
+    holding: "拖后腿的是：", raise: "最能加分的是：",
+    verdicts: { "BUILD IT": "动手做 BUILD IT", "NARROW IT": "先收窄 NARROW IT", "NOT YET": "还不到时候 NOT YET" },
+    start_with: "先找：", gather: "他们在哪：", opener: "开场问题：", listen: "注意听：",
+    pass: "通过标准：", miss: "如果没通过：",
+    sources: "来源",
+    again: "再测一个 idea",
+    cta_title: "想看看往届获奖的学生 idea 长什么样？",
+    cta_1: "看看我们的 idea database：challenge-startup-coach skill，收录 Diamond Challenge、Conrad Challenge、Blue Ocean 的 152 个真实决赛项目（其中 62 个获奖），以及包括 DECA 在内四大比赛的评分标准 → ",
+    cta_2a: "联系 Built Young → ",
+    cta_2b: " ，一起 build this！"
+  }
+};
+
+const LINE_ORDER = ["problem_who", "real_person", "substitute", "demand", "money", "reach", "build"];
+const DB_URL = "https://github.com/BuiltYoung/challenge_startup_coach";
+const BY_URL = "https://builtyoung.org/";
+
+const SAMPLE = {
+  language: "en",
+  idea_name: "Echo (回响)",
+  intake_summary: [
+    "An AI matchmaker, 小回, turns a one-line wish into matches. A chat opens only when both people click 想认识.",
+    "First users: Chinese-speaking 搭子 seekers in Toronto and nearby.",
+    "Today they use 小红书 posts, Meetup or Luma, and dating apps.",
+    "You've talked to 5+ people about their last attempt.",
+    "Built but not launched; the plan is a membership."
+  ],
+  unanswered: [],
+  idea_fit: {
+    sentence: "Chinese-speaking 搭子 seekers in the GTA struggle to find activity partners they can trust, so Echo matches them by activity, level and distance and shows a credit score earned only by showing up, which means fewer no-shows and safer first meetups.",
+    fit: "The fit is strong: mutual 想认识, QR check-in and a reliability-only credit score all target that trust gap.",
+    biggest_gap: "Focus. 搭子 seekers come first, but 姻缘 and 1:1 matching are built alongside it and split a small user pool.",
+    safety_note: "Meeting strangers means 18+ only and public meeting places. Echo already covers most of this: public meeting places, phone checks, and pausing recommendations when someone is reported as under 18."
+  },
+  competitors: {
+    items: [
+      { name: "小红书 找搭子 posts", what: "Free and full of the right people, but you meet a stranger off a post with no history.", source_url: "https://www.jiemian.com/article/10185990.html" },
+      { name: "Meetup, Luma and Bumble BFF", what: "r/askTO's usual tips for meeting people in Toronto. The events are real, but they run in English and aren't their community.", source_url: "https://redlib.cypherpunktools.com/r/askTO/comments/1jpkx7l/megathread_how_to_make_friends_in_toronto" },
+      { name: "TOconnect", what: "A Toronto app (\"Toronto Offline Social\") for finding people to join activities downtown. Too few ratings to show any.", source_url: "https://apps.apple.com/us/app/toconnect/id6503181735" },
+      { name: "DMeet 直面", what: "A Chinese-language app with 搭子 matching, dating and offline events, plus real-name checks.", source_url: "https://apps.apple.com/us/app/id6753893655" }
+    ],
+    edge: "None of these shows people a record of who actually turned up. Echo does, in Chinese, for the GTA."
+  },
+  opportunity: {
+    wedge: "Start with 广场 events for one activity in one area, for example badminton in North York.",
+    why_start_here: "Group meetups feel safer than 1:1 meetings with strangers, and one host fills 4–12 spots at once, so the app works before you have many users.",
+    money_signal: "Timeleft sells subscriptions for dinners with strangers in Toronto, and Lovevite charges a membership fee. Nobody has paid Echo yet, so test whether people will pay monthly before building a paywall."
+  },
+  score: {
+    lines: [
+      { line: "problem_who", max: 15, score: 10, why: "搭子 seekers is a group you can find; the product is still three in one" },
+      { line: "real_person", max: 20, score: 12, why: "5+ conversations, but no names or findings shared yet" },
+      { line: "substitute", max: 15, score: 9, why: "Clear workarounds; their cost is trust and fit, not money, and they're free" },
+      { line: "demand", max: 15, score: 7, why: "小红书 找搭子 and r/askTO friend threads are real; no Echo waitlist yet" },
+      { line: "money", max: 15, score: 8, why: "Timeleft and Lovevite prove people pay; Echo's subscription is untested" },
+      { line: "reach", max: 10, score: 5, why: "小红书 is a channel you can use now; no launch plan yet" },
+      { line: "build", max: 10, score: 7, why: "v2.19 is built; SMS is in dev mode and the server runs on a personal computer" }
+    ],
+    total: 58,
+    verdict: "NARROW IT",
+    holding_back: "The product is far ahead of the evidence: no names or findings from your conversations yet, and no sign-ups.",
+    raise_most: "Real person. Write down who the 5+ people are, their last attempt and what went wrong. Add real sign-ups from step 6 and Echo gets close to 70.",
+    verdict_advice: "Keep 搭子 seekers and 广场. Park 姻缘 and 1:1 回响 for now."
+  },
+  targeting: {
+    start_with: "Chinese-speaking 搭子 seekers in North York. Begin with badminton and board games, and with the 5+ people you've already asked.",
+    where_they_gather: "小红书 posts under Toronto and 多伦多 tags.",
+    opener: "上次你在小红书找搭子，最后见到人了吗？见面前你是怎么判断对方靠不靠谱的？ (Last time you looked for a 搭子 on 小红书, did you actually meet up? How did you decide they were trustworthy?)",
+    listen_for: [
+      "Which is the bigger pain, trusting strangers or no-shows. That decides whether the credit score is the product.",
+      "Which activity comes up most.",
+      "Whether they'd pay monthly or only per event."
+    ]
+  },
+  one_thing: {
+    step: "Switch SMS verification out of dev mode, post one North York badminton game on Echo's web version, and share it in 3 小红书 notes tagged 多伦多 搭子.",
+    pass_bar: "At least 8 strangers sign up within 48 hours, and at least 4 check in by QR on the day.",
+    if_it_misses: "小红书 posts are solving this well enough."
+  },
+  sources: [
+    { title: "TOconnect (App Store)", url: "https://apps.apple.com/us/app/toconnect/id6503181735" },
+    { title: "r/askTO: How to Make Friends in Toronto megathread", url: "https://redlib.cypherpunktools.com/r/askTO/comments/1jpkx7l/megathread_how_to_make_friends_in_toronto" },
+    { title: "DMeet 直面 (App Store)", url: "https://apps.apple.com/us/app/id6753893655" },
+    { title: "Tasting Table on Timeleft", url: "https://www.tastingtable.com/1859085/dinner-parties-with-strangers-timeleft" },
+    { title: "Timeleft dinner review (Toronto)", url: "https://seeyounexttuesdaymedia.com/articles/timeleft-dinner-review" },
+    { title: "Lovevite (App Store)", url: "https://apps.apple.com/us/app/id1317212033" },
+    { title: "小红书 找搭子 (界面新闻)", url: "https://www.jiemian.com/article/10185990.html" }
+  ]
+};
+
+/* ---------- state ---------- */
+let uiLang = "en";
+try { if ((localStorage.getItem("by_lang") || "") === "zh") uiLang = "zh"; } catch (e) {}
+let lastReport = null, lastBanner = null;
+
+const $ = (id) => document.getElementById(id);
+const form = $("form"), loading = $("loading"), errBox = $("error"), reportEl = $("report");
+
+/* Build DOM safely: every string goes in as text, never as HTML. */
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") n.className = v;
+    else if (k === "style") n.setAttribute("style", v);
+    else n.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === "") continue;
+    n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return n;
+}
+const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u)) ? u : null;
+const extLink = (url, text) => safeUrl(url) ? el("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, text) : null;
+const s = (v) => (typeof v === "string" ? v.trim() : "");
+
+/* ---------- i18n ---------- */
+function applyLang() {
+  const t = T[uiLang];
+  document.documentElement.lang = uiLang === "zh" ? "zh-CN" : "en";
+  $("langBtn").textContent = t.toggle;
+  document.querySelectorAll("[data-t]").forEach((n) => {
+    const v = t[n.dataset.t];
+    if (typeof v === "string") n.textContent = v;
+  });
+  document.querySelectorAll("[data-ph]").forEach((n) => { n.placeholder = t[n.dataset.ph] || ""; });
+  buildPills("stagePills", "stage", t.stage);
+  buildPills("moneyPills", "money", t.money);
+  $("sampleBtn").hidden = !CONFIG.SHOW_SAMPLE_LINK;
+  if (lastReport) renderReport(lastReport, lastBanner);
+}
+function buildPills(id, name, labels) {
+  const box = $(id);
+  const current = (form.querySelector(`input[name=${name}]:checked`) || {}).value;
+  box.textContent = "";
+  for (const [value, label] of Object.entries(labels)) {
+    const input = el("input", { type: "radio", name, value, id: `${name}-${value}` });
+    if (value === current) input.checked = true;
+    box.append(el("label", { class: "pill", for: `${name}-${value}` }, input, el("span", {}, label)));
+  }
+}
+$("langBtn").addEventListener("click", () => {
+  uiLang = uiLang === "en" ? "zh" : "en";
+  try { localStorage.setItem("by_lang", uiLang); } catch (e) {}
+  applyLang();
+});
+
+/* ---------- report ---------- */
+function verdictFor(total) { return total >= 70 ? "BUILD IT" : total >= 40 ? "NARROW IT" : "NOT YET"; }
+
+function normaliseScore(score) {
+  const maxes = { problem_who: 15, real_person: 20, substitute: 15, demand: 15, money: 15, reach: 10, build: 10 };
+  const byId = {};
+  for (const l of (score && score.lines) || []) if (!byId[l.line]) byId[l.line] = l;
+  const lines = LINE_ORDER.map((id) => {
+    const l = byId[id] || {};
+    const max = maxes[id];
+    return { line: id, max, score: Math.max(0, Math.min(max, Math.round(Number(l.score) || 0))), why: s(l.why) };
+  });
+  const total = lines.reduce((a, l) => a + l.score, 0);
+  return { lines, total, verdict: verdictFor(total) };
+}
+
+function section(emoji, num, title, ...body) {
+  return el("section", { class: "sec" },
+    el("h3", {}, el("span", { class: "e", "aria-hidden": "true" }, emoji), `${num}. ${title}`),
+    ...body);
+}
+const labelled = (label, text) => s(text) ? el("p", {}, el("span", { class: "lbl" }, label), " ", s(text)) : null;
+
+function renderReport(r, banner) {
+  const L = T[r.language === "zh" ? "zh" : "en"];
+  const sc = normaliseScore(r.score);
+  const vClass = sc.verdict === "BUILD IT" ? "v-build" : sc.verdict === "NARROW IT" ? "v-narrow" : "v-notyet";
+  reportEl.textContent = "";
+
+  if (banner) reportEl.append(el("div", { class: "banner" }, T[uiLang][banner]));
+  reportEl.append(el("h2", { class: "title" }, `${s(r.idea_name) || "Your idea"}${L.title_suffix}`));
+
+  const summary = (r.intake_summary || []).map(s).filter(Boolean);
+  const gaps = (r.unanswered || []).map(s).filter(Boolean);
+  if (summary.length || gaps.length) {
+    reportEl.append(el("div", { class: "understood" },
+      el("h3", {}, L.understood),
+      summary.length ? el("ul", {}, summary.map((x) => el("li", {}, x))) : null,
+      gaps.length ? el("p", { class: "gaps" }, `${L.gaps} ${gaps.join("; ")}`) : null));
+  }
+
+  const f = r.idea_fit || {};
+  reportEl.append(section("🔍", 1, L.s1,
+    el("p", { class: "lede" }, s(f.sentence)),
+    s(f.fit) ? el("p", {}, s(f.fit)) : null,
+    labelled(L.gap, f.biggest_gap),
+    labelled(L.safety, f.safety_note)));
+
+  const c = r.competitors || {};
+  reportEl.append(section("📊", 2, L.s2,
+    el("ul", { class: "comp" }, (c.items || []).map((it) => el("li", {},
+      el("span", { class: "lbl" }, s(it.name)), " ", s(it.what),
+      safeUrl(it.source_url) ? el("span", { class: "src" }, "(", extLink(it.source_url, L.source), ")") : null))),
+    s(c.edge) ? el("p", {}, s(c.edge)) : null));
+
+  const o = r.opportunity || {};
+  reportEl.append(section("✨", 3, L.s3,
+    s(o.wedge) ? el("p", {}, s(o.wedge)) : null,
+    labelled(L.why_here, o.why_start_here),
+    labelled(L.money_signal, o.money_signal)));
+
+  const bar = el("div", { class: "bar", "aria-hidden": "true" },
+    sc.lines.map((l) => el("div", { class: "seg", style: `flex:${l.max}`, title: `${L.lines[l.line]} ${l.score}/${l.max}` },
+      el("i", { style: `width:${(l.score / l.max) * 100}%` }))));
+  const labels = el("div", { class: "barlabels", "aria-hidden": "true" },
+    sc.lines.map((l) => el("span", { style: `flex:${l.max}` }, L.lines[l.line])));
+  const table = el("table", {},
+    el("thead", {}, el("tr", {}, el("th", {}, L.th_line), el("th", {}, L.th_score), el("th", {}, L.th_why))),
+    el("tbody", {}, sc.lines.map((l) => el("tr", {},
+      el("td", { class: "name" }, L.lines[l.line]),
+      el("td", { class: "pts" }, `${l.score}/${l.max}`),
+      el("td", {}, l.why)))));
+  const sr = r.score || {};
+  reportEl.append(section("📈", 4, L.s4,
+    el("div", { class: "scorehead" },
+      el("div", { class: "big", "aria-label": `${sc.total} out of 100` }, String(sc.total), el("small", {}, L.out_of)),
+      el("span", { class: `verdict ${vClass}` }, L.verdicts[sc.verdict])),
+    bar, labels, table,
+    labelled(L.holding, sr.holding_back),
+    labelled(L.raise, sr.raise_most),
+    s(sr.verdict_advice) ? el("div", { class: "advice" }, s(sr.verdict_advice)) : null));
+
+  const tg = r.targeting || {};
+  const listen = (tg.listen_for || []).map(s).filter(Boolean);
+  reportEl.append(section("🎯", 5, L.s5,
+    labelled(L.start_with, tg.start_with),
+    labelled(L.gather, tg.where_they_gather),
+    s(tg.opener) ? el("p", {}, el("span", { class: "lbl" }, L.opener)) : null,
+    s(tg.opener) ? el("div", { class: "quote" }, s(tg.opener)) : null,
+    listen.length ? el("p", {}, el("span", { class: "lbl" }, L.listen)) : null,
+    listen.length ? el("ul", { class: "plain" }, listen.map((x) => el("li", {}, x))) : null));
+
+  const ot = r.one_thing || {};
+  reportEl.append(section("💡", 6, L.s6,
+    s(ot.step) ? el("p", { class: "lede" }, s(ot.step)) : null,
+    labelled(L.pass, ot.pass_bar),
+    labelled(L.miss, ot.if_it_misses)));
+
+  reportEl.append(el("aside", { class: "cta" },
+    el("h3", {}, "🚀 ", L.cta_title),
+    el("p", {}, L.cta_1, extLink(DB_URL, DB_URL)),
+    el("p", {}, L.cta_2a, extLink(BY_URL, BY_URL), L.cta_2b)));
+
+  const srcs = (r.sources || []).filter((x) => safeUrl(x.url));
+  if (srcs.length) {
+    reportEl.append(el("div", { class: "sources" },
+      el("h3", {}, L.sources),
+      el("ol", {}, srcs.map((x) => el("li", {}, extLink(x.url, s(x.title) || x.url))))));
+  }
+
+  const again = el("button", { class: "again", type: "button" }, T[uiLang].again);
+  again.addEventListener("click", resetToForm);
+  reportEl.append(again);
+}
+
+/* ---------- flow ---------- */
+let timer = null;
+function show(which) {
+  form.hidden = which !== "form";
+  $("intro").hidden = which === "report";
+  loading.hidden = which !== "loading";
+  reportEl.hidden = which !== "report";
+  if (which !== "error-inline") errBox.hidden = true;
+}
+function startLoading() {
+  show("loading");
+  const t0 = Date.now();
+  $("elapsed").textContent = T[uiLang].elapsed(0);
+  timer = setInterval(() => { $("elapsed").textContent = T[uiLang].elapsed(Math.round((Date.now() - t0) / 1000)); }, 1000);
+  loading.scrollIntoView({ block: "start" });
+}
+function stopLoading() { clearInterval(timer); timer = null; }
+function showReport(r, banner) {
+  stopLoading();
+  lastReport = r; lastBanner = banner;
+  renderReport(r, banner);
+  show("report");
+  window.scrollTo({ top: 0 });
+  reportEl.focus({ preventScroll: true });
+}
+function showError(key) {
+  stopLoading();
+  show("form");
+  $("errorMsg").textContent = T[uiLang][key] || T[uiLang].error_generic;
+  errBox.hidden = false;
+  form.parentNode.insertBefore(errBox, form);
+  errBox.scrollIntoView({ block: "start" });
+  setBusy(false);
+}
+function setBusy(busy) {
+  const b = $("submitBtn");
+  b.disabled = busy;
+  b.textContent = busy ? T[uiLang].submitting : T[uiLang].submit;
+}
+function resetToForm() {
+  lastReport = null; lastBanner = null;
+  show("form");
+  setBusy(false);
+  window.scrollTo({ top: 0 });
+}
+
+$("sampleBtn").addEventListener("click", () => showReport(SAMPLE, "banner_sample"));
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(form);
+  const answers = {
+    idea: s(fd.get("idea")), customer: s(fd.get("customer")), problem: s(fd.get("problem")),
+    real_person: s(fd.get("real_person")), stage: s(fd.get("stage")), money: s(fd.get("money")),
+    details: s(fd.get("details"))
+  };
+  const ideaErr = $("ideaErr");
+  if (answers.idea.length < 10) {
+    ideaErr.hidden = false;
+    $("idea").setAttribute("aria-invalid", "true");
+    $("idea").focus();
+    return;
+  }
+  ideaErr.hidden = true;
+  $("idea").removeAttribute("aria-invalid");
+  setBusy(true);
+  startLoading();
+
+  if (!CONFIG.API_URL) {
+    setTimeout(() => { setBusy(false); showReport(SAMPLE, "banner_preview"); }, 1200);
+    return;
+  }
+
+  const ctrl = new AbortController();
+  const killer = setTimeout(() => ctrl.abort(), CONFIG.TIMEOUT_MS);
+  try {
+    const headers = { "content-type": "application/json" };
+    if (CONFIG.API_KEY) { headers.authorization = `Bearer ${CONFIG.API_KEY}`; headers.apikey = CONFIG.API_KEY; }
+    const res = await fetch(CONFIG.API_URL, {
+      method: "POST", headers, signal: ctrl.signal,
+      body: JSON.stringify({ answers, ui_lang: uiLang, website: s(fd.get("website")) })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.report) {
+      const map = { rate_limited: "error_rate", idea_required: "error_idea", refused: "error_refused" };
+      throw new Error(map[data.error] || "error_generic");
+    }
+    setBusy(false);
+    showReport(data.report, null);
+  } catch (err) {
+    showError(err.name === "AbortError" ? "error_timeout" : (T.en[err.message] ? err.message : "error_generic"));
+  } finally {
+    clearTimeout(killer);
+  }
+});
+
+applyLang();
+setBusy(false);
+</script>
+</body>
+</html>
