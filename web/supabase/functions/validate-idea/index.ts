@@ -275,12 +275,13 @@ async function writeReport(a: Answers, uiLang: string, r: { brief: string; sourc
 
   const data = await callClaude({
     model: MODEL,
-    max_tokens: 4000,
+    max_tokens: 12000,
     system: REPORT_SYSTEM,
     output_config: { format: { type: "json_schema", schema: REPORT_SCHEMA } },
     messages: [{ role: "user", content: prompt }],
   });
   if (data.stop_reason === "refusal") throw new Error("refusal");
+  if (data.stop_reason === "max_tokens") throw new Error("report cut off at max_tokens");
   const text = (data.content ?? []).find((b: { type: string }) => b.type === "text")?.text;
   if (!text) throw new Error("empty report");
   return JSON.parse(text);
